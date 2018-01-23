@@ -8,10 +8,6 @@ export NCURSES_NO_UTF8_ACS=1
 
 separator=":"
 
-port="5900"
-framerate="23"
-mypassword=""
-
 function CHECK_ROOT {
   # check if root for future installations
   if [ "$(id -u)" != "0" ];
@@ -27,7 +23,7 @@ function OPTIONS {
   case $VALUE in
     1) ONE;;
     2) TWO;;
-    3) echo "$VALUE";;
+    3) THREE;;
     4) echo "$VALUE";;
     5) echo "$VALUE";;
     6) echo "$VALUE";;
@@ -43,7 +39,8 @@ function APT-UPDATE {
 
 function APT-DISTUPGRADE {
   apt-get -y dist-upgrade
-  apt-get autoremove
+  apt-get -y autoclean
+  apt-get -y autoremove
 }
 
 function ONE {
@@ -60,8 +57,9 @@ function DONE {
          5 20
 }
 
-function TWO {
-  CONFS
+function TWO () {
+  FRESH_VARIABLES
+  CONFS SET_VARIABLES
 }
 
 function TWO_PARTS {
@@ -70,7 +68,41 @@ function TWO_PARTS {
   MENU
 }
 
-function CONFS {
+function THREE {
+  CONFS FOUR
+}
+
+function FOUR {
+  echo "4"
+  pass="4444"
+  sed -i /etc/dispmanx_vncserver.conf -e 's/password =.*/password = "'"$pass"'";/'
+  sed -i /etc/dispmanx_vncserver.conf -e 's/port =.*/port = '"$pass"';/'
+}
+
+function GREP_VARIABLES {
+  port=$(egrep "port" /etc/dispmanx_vncserver.conf | egrep -o [0-9]+)
+  framerate=$(egrep "frame-rate" /etc/dispmanx_vncserver.conf | egrep -o [0-9]+)
+  mypassword=$(egrep "password" /etc/dispmanx_vncserver.conf | cut -d'"' -f2)
+}
+
+function FRESH_VARIABLES {
+  port="5900"
+  framerate="23"
+  mypassword=""
+}
+
+function COPY_CONF {
+  sudo cp dispmanx_vncserver.conf.sample /etc/dispmanx_vncserver.conf
+}
+
+function SET_VARIABLES {
+  sed -i /etc/dispmanx_vncserver.conf -e 's/port =.*/port = '"$port"';/'
+  sed -i /etc/dispmanx_vncserver.conf -e 's/frame-rate =.*/frame-rate = '"$framerate"';/'
+  sed -i /etc/dispmanx_vncserver.conf -e 's/password =.*/password = "'"$mypassword"'";/'
+}
+
+function CONFS () {
+  echo $1
   # Store data to $VALUES variable
   VALUES=$(dialog --title "" \
          --stdout \
@@ -93,22 +125,18 @@ function CONFS {
   framerate=$(echo "$VALUES" | cut -f 2 -d "$separator")
   mypassword=$(echo "$VALUES" | cut -f 3 -d "$separator")
   
-  echo "$port"
-  echo "$framerate"
-  echo "$mypassword"
+  #echo "$port"
+  #echo "$framerate"
+  #echo "$mypassword"
   
   case $rep in
-   0) TWO_PARTS;;
+   0) $1;;
    1) MENU;;
    255) MENU;;
   esac
 }
 
-function MENU {
-  port="5900"
-  framerate="23"
-  mypassword=""
-  
+function MENU { 
   # Store data to $VALUES variable
   VALUE=$(dialog --backtitle "Installing VNC-Server on OSMC" --title "" \
          --stdout \
