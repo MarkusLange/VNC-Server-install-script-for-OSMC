@@ -24,28 +24,28 @@ function OPTIONS {
     1) ONE;;
     2) TWO;;
     3) THREE;;
-    4) echo "$VALUE";;
+    4) FOUR;;
     5) echo "$VALUE";;
     6) echo "$VALUE";;
     7) echo "$VALUE";;
     8) echo "$VALUE";;
-	9) echo "$VALUE";;
+	9) CREATE_SERVICE_FILE;;
   esac
 }
 
-function APT-UPDATE {
+function APT_UPDATE {
   apt-get update 1> /dev/null
 }
 
-function APT-DISTUPGRADE {
+function APT_DISTUPGRADE {
   apt-get -y dist-upgrade
   apt-get -y autoclean
   apt-get -y autoremove
 }
 
 function ONE {
-  APT-UPDATE
-  APT-DISTUPGRADE
+  APT_UPDATE
+  APT_DISTUPGRADE
   DONE
   sleep 1
   MENU
@@ -72,11 +72,16 @@ function THREE {
   CONFS FOUR
 }
 
+#function FOUR {
+#  echo "4"
+#  pass="4444"
+#  sed -i /etc/dispmanx_vncserver.conf -e 's/password =.*/password = "'"$pass"'";/'
+#  sed -i /etc/dispmanx_vncserver.conf -e 's/port =.*/port = '"$pass"';/'
+#}
+
 function FOUR {
-  echo "4"
-  pass="4444"
-  sed -i /etc/dispmanx_vncserver.conf -e 's/password =.*/password = "'"$pass"'";/'
-  sed -i /etc/dispmanx_vncserver.conf -e 's/port =.*/port = '"$pass"';/'
+  GREP_VARIABLES
+  CONFIG SET_VARIABLES
 }
 
 function GREP_VARIABLES {
@@ -101,7 +106,63 @@ function SET_VARIABLES {
   sed -i /etc/dispmanx_vncserver.conf -e 's/password =.*/password = "'"$mypassword"'";/'
 }
 
-function CONFS () {
+function APT_INSTALL {
+  apt-get install -y build-essential rbp-userland-dev-osmc libvncserver-dev libconfig++-dev unzip 1> /dev/null
+}
+
+function CLEAN {
+  cd /home/osmc
+  
+  if [ -d "dispmanx_vnc-master/" ];
+    then
+      rm -rf dispmanx_vnc-master/
+  fi
+  
+  if [ -d "master.zip" ];
+    then
+      rm -f master.zip
+  fi
+}
+
+function GET_DISPMANX {
+  cd /home/osmc
+  wget -q https://github.com/patrikolausson/dispmanx_vnc/archive/master.zip
+  unzip -q -u master.zip -d  /home/osmc/
+}
+
+function MAKE_DISPMANX {
+  cd dispmanx_vnc-master
+  
+  # --quiet after make to make it silent
+  make --quiet clean
+  make --quiet
+}
+
+function CREATE_SERVICE_FILE {
+cat > "/etc/systemd/system/dispmanx_vncserver.service" <<-EOF
+[Unit]
+Description=VNC Server
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+Restart=on-failure
+RestartSec=30
+Nice=15
+User=root
+Group=root
+Type=simple
+ExecStartPre=/sbin/modprobe evdev
+ExecStart=/usr/bin/dispmanx_vncserver
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+}
+
+function CONFIG () {
   echo $1
   # Store data to $VALUES variable
   VALUES=$(dialog --title "" \
