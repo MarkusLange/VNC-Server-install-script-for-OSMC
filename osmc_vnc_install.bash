@@ -50,7 +50,7 @@ function OPTIONS {
   case $VALUE in
     1) OSMC_UPATE;;
     2) INSTALL_VNC_SERVER_AND_SERVICE;;
-	3) REMOVE_VNC_SERVER_AND_SERVICE;;
+    3) REMOVE_VNC_SERVER_AND_SERVICE;;
     4) UPDATE_VNC_SERVER;;
     5) CHANGE_VNC_SETTINGS;;
     6) START_VNC;;
@@ -210,7 +210,7 @@ function REMOVE_FILES {
 
 function REMOVE_CONF {
   cd /etc
-
+  
   if [ -e "dispmanx_vncserver.conf" ];
     then
       rm -f dispmanx_vncserver.conf
@@ -219,7 +219,7 @@ function REMOVE_CONF {
 
 function REMOVE_BIN {
   cd /usr/bin
-
+  
   if [ -e "dispmanx_vncserver" ];
     then
       rm -f dispmanx_vncserver
@@ -228,7 +228,7 @@ function REMOVE_BIN {
 
 function REMOVE_SERVICE_FILE {
   cd /etc/systemd/system
-
+  
   if [ -e "dispmanx_vncserver.service" ];
     then
       rm -f dispmanx_vncserver.service
@@ -287,8 +287,8 @@ function CONFIG () {
          --stdout \
          --backtitle "Installing VNC-Server on OSMC" \
          --insecure \
-		 --ok-label Set \
-		 $1 \
+         --ok-label Set \
+         $1 \
          --output-separator $separator \
          --mixedform "Configuration" \
          10 50 0 \
@@ -297,11 +297,11 @@ function CONFIG () {
         "VNC-Password:"      3 2 "$mypassword"  3 21 12 0 1 \
   )
   rep=$?
-
+  
   # display values just entered
   #echo "$VALUES"
   #echo "$response"
-
+  
   port=$(echo "$VALUES" | cut -f 1 -d "$separator")
   framerate=$(echo "$VALUES" | cut -f 2 -d "$separator")
   mypassword=$(echo "$VALUES" | cut -f 3 -d "$separator")
@@ -322,7 +322,7 @@ function CONFIG () {
   esac
 }
 
-function MENU { 
+function MENU {
   # Store data to $VALUES variable
   VALUE=$(dialog --backtitle "Installing VNC-Server on OSMC" \
          --title "" \
@@ -332,7 +332,7 @@ function MENU {
          --menu "Choose a Option" 17 57 9 \
          "1" "OSMC System-Update" \
          "2" "Install VNC Server and Service" \
-		 "3" "Remove VNC Server and Service" \
+         "3" "Remove VNC Server and Service" \
          "4" "Update VNC Server (mandatory after a kernel update)" \
          "5" "Change VNC Configuration" \
          "6" "Start VNC (manual, not Service)" \
