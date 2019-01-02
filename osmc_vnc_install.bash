@@ -236,7 +236,7 @@ function REMOVE_SERVICE_FILE {
 }
 
 function GET_DISPMANX {
-  cd ~
+  cd /home/osmc/
   
   wget -q https://github.com/patrikolausson/dispmanx_vnc/archive/master.zip
   unzip -q -u master.zip -d  /home/osmc/
