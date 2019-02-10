@@ -372,9 +372,9 @@ case $1 in
   --stop-vnc) STOP_VNC;;
   --activate-service) ACTIVATE_VNC_SERVICE;;
   --deaktivate-service) DEACTIVATE_VNC_SERVICE;;
-  --help) echo "This information"
+  --help) echo "This information";;
   *) CHECK_ROOT
-     MENU ;;
+     MENU;;
 esac
 
 #CHECK_ROOT
