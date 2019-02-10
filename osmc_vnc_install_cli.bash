@@ -358,8 +358,8 @@ function MENU {
 }
 
 port=$2
-framerate=$2
-mypassword=$3
+framerate=$3
+mypassword=$4
 
 case $1 in
   --system-update) OSMC_UPATE;;
