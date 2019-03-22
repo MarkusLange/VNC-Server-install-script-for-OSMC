@@ -361,6 +361,20 @@ port=$2
 framerate=$3
 mypassword=$4
 
+function HELP {
+  echo "This script has to run as root, sudo %0"
+  echo "--system-update, updates OSMC and the system"
+  echo "--install-vnc, install VNC with three additional parameter needed port, framerate and password"
+  echo "--remove-vnc, removes all files from VNC"
+  echo "--update-vnc, recompile VNC after an OSMC update"
+  echo "--change-config, changes the config with three additional parameter needed port, framerate and password"
+  echo "--start-vnc, start VNC-Server"
+  echo "--stop-vnc, stop VNC-Server"
+  echo "--activate-service, activate VNC as service"
+  echo "--deactivate-service, deactivate the VNC as service"
+  echo "--help, this!"
+}
+
 case $1 in
   --system-update) OSMC_UPATE;;
   --install-vnc) INSTALL_VNC_SERVER_AND_SERVICE
@@ -371,8 +385,8 @@ case $1 in
   --start-vnc) START_VNC;;
   --stop-vnc) STOP_VNC;;
   --activate-service) ACTIVATE_VNC_SERVICE;;
-  --deaktivate-service) DEACTIVATE_VNC_SERVICE;;
-  --help) echo "This information";;
+  --deactivate-service) DEACTIVATE_VNC_SERVICE;;
+  --help) HELP;;
   *) CHECK_ROOT
      MENU;;
 esac
