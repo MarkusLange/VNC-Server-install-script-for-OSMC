@@ -12,10 +12,8 @@ function CHECK_ROOT {
   # check if root for future installations
   if [ "$(id -u)" != "0" ];
     then
-      echo "This script must be run as root. Like this sudo $0" #1>&2
+	  HELP
       exit 1
-    else
-      echo "This script runs as root." #1>&2
   fi
 }
 
@@ -95,14 +93,14 @@ function DONE {
   dialog --backtitle "Installing VNC-Server on OSMC" \
          --infobox "Done" \
          5 20
-  sleep 1
+  sleep 0.5
 }
 
 function EXIT {
   dialog --backtitle "Installing VNC-Server on OSMC" \
          --infobox "Exit" \
          5 20
-  sleep 1
+  sleep 0.5
   clear
 }
 
@@ -116,8 +114,6 @@ function INSTALL_VNC_SERVER_AND_SERVICE () {
   CREATE_SERVICE_FILE
   systemctl daemon-reload
   ACTIVATE_VNC_SERVICE
-#  GREP_VARIABLES
-#  CONFIG --nocancel
 }
 
 function UPDATE_VNC_SERVER {
@@ -362,17 +358,26 @@ framerate=$3
 mypassword=$4
 
 function HELP {
-  echo "This script has to run as root, sudo %0"
-  echo "--system-update, updates OSMC and the system"
-  echo "--install-vnc, install VNC with three additional parameter needed port, framerate and password"
-  echo "--remove-vnc, removes all files from VNC"
-  echo "--update-vnc, recompile VNC after an OSMC update"
-  echo "--change-config, changes the config with three additional parameter needed port, framerate and password"
-  echo "--start-vnc, start VNC-Server"
-  echo "--stop-vnc, stop VNC-Server"
-  echo "--activate-service, activate VNC as service"
+  echo "This script has to run as root: sudo $0"
+  echo
+  echo "You can start this script as GUI without parameter, or by using the"
+  echo "following parameter to run it in CLI-Mode:"
+  echo
+  echo "--system-update,      updates OSMC and the system"
+  echo "--install-vnc,        install VNC with three additional parameter needed port,"
+  echo "                      framerate and password"
+  echo "                      e.g. --install-vnc 1234 30 osmc"
+  echo "--remove-vnc,         removes all files from VNC"
+  echo "--update-vnc,         recompile VNC after an OSMC update"
+  echo "--change-config,      changes the config with three additional parameter needed"
+  echo "                      port, framerate and password"
+  echo "                      e.g. --change-config 1234 30 osmc"
+  echo "--start-vnc,          start VNC-Server"
+  echo "--stop-vnc,           stop VNC-Server"
+  echo "--activate-service,   activate VNC as service"
   echo "--deactivate-service, deactivate the VNC as service"
   echo "--help, this!"
+  echo
 }
 
 case $1 in
@@ -390,6 +395,3 @@ case $1 in
   *) CHECK_ROOT
      MENU;;
 esac
-
-#CHECK_ROOT
-#MENU
