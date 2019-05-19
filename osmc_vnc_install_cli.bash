@@ -77,8 +77,11 @@ function OSMC_UPATE {
   echo "starting"
   APT_UPDATE
   APT_CLEAN
-  REBOOT_FOLLOWS
-  sleep 1
+  if [ -n "$1" ];
+    then
+      REBOOT_FOLLOWS
+  fi
+  sleep 0.5
   clear
   reboot
 }
@@ -126,8 +129,8 @@ function UPDATE_VNC_SERVER {
 }
 
 function CHANGE_VNC_SETTINGS() {
-  GREP_VARIABLES $1
-  CONFIG
+  GREP_VARIABLES
+  CONFIG $1
 }
 
 function START_VNC {
