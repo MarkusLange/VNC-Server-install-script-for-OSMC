@@ -331,7 +331,7 @@ function MENU {
          --no-tags \
          --cancel-label "Quit" \
          --menu "Choose a Option" 17 57 9 \
-         "1" "OSMC System-Update" \
+         "1" "OSMC System-Update (with forced reboot)" \
          "2" "Install VNC Server and Service" \
          "3" "Remove VNC Server and Service" \
          "4" "Update VNC Server (mandatory after a kernel update)" \
@@ -367,7 +367,7 @@ function HELP {
   echo "You can start this script as GUI without parameter, or by using the"
   echo "following parameter to run it in CLI-Mode:"
   echo
-  echo "--system-update,      updates OSMC and the system"
+  echo "--system-update,      updates OSMC and the system (with forced reboot)"
   echo "--install-vnc,        install VNC with three additional parameter needed port,"
   echo "                      framerate and password"
   echo "                      e.g. --install-vnc 5900 25 osmc"
