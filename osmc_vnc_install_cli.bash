@@ -12,7 +12,7 @@ function CHECK_ROOT {
   # check if root for future installations
   if [ "$(id -u)" != "0" ];
     then
-	  HELP
+      HELP
       exit 1
   fi
 }
@@ -23,6 +23,7 @@ function CHECK_SERVICE_ACTIVE {
       systemctl stop dispmanx_vncserver.service
   fi
 }
+
 function CHECK_SERVICE_INACTIVE {
   if [ "`systemctl show dispmanx_vncserver.service -p ActiveState`" = "ActiveState=inactive" ]
     then
@@ -48,12 +49,12 @@ function OPTIONS {
   case $VALUE in
     1) OSMC_UPATE;;
     2) INSTALL_VNC_SERVER_AND_SERVICE
-	   CHANGE_VNC_SETTINGS --nocancel;;
+       CHANGE_VNC_SETTINGS --nocancel;;
     3) REMOVE_VNC_SERVER_AND_SERVICE
-	   DONE
+       DONE
        MENU;;
     4) UPDATE_VNC_SERVER
-	   DONE
+       DONE
        MENU;;
     5) CHANGE_VNC_SETTINGS;;
     6) START_VNC;;
@@ -107,7 +108,7 @@ function EXIT {
   clear
 }
 
-function INSTALL_VNC_SERVER_AND_SERVICE () {
+function INSTALL_VNC_SERVER_AND_SERVICE {
   echo -n "starting"
   APT_UPDATE
   APT_INSTALL
@@ -369,12 +370,12 @@ function HELP {
   echo "--system-update,      updates OSMC and the system"
   echo "--install-vnc,        install VNC with three additional parameter needed port,"
   echo "                      framerate and password"
-  echo "                      e.g. --install-vnc 1234 30 osmc"
+  echo "                      e.g. --install-vnc 5900 25 osmc"
   echo "--remove-vnc,         removes all files from VNC"
   echo "--update-vnc,         recompile VNC after an OSMC update"
   echo "--change-config,      changes the config with three additional parameter needed"
   echo "                      port, framerate and password"
-  echo "                      e.g. --change-config 1234 30 osmc"
+  echo "                      e.g. --change-config 5900 25 osmc"
   echo "--start-vnc,          start VNC-Server"
   echo "--stop-vnc,           stop VNC-Server"
   echo "--activate-service,   activate VNC as service"
@@ -384,17 +385,18 @@ function HELP {
 }
 
 case $1 in
-  --system-update) OSMC_UPATE;;
-  --install-vnc) INSTALL_VNC_SERVER_AND_SERVICE
-                 SET_VARIABLES;;
-  --remove-vnc) REMOVE_VNC_SERVER_AND_SERVICE;;
-  --update-vnc) UPDATE_VNC_SERVER;;
-  --change-config) SET_VARIABLES;;
-  --start-vnc) START_VNC;;
-  --stop-vnc) STOP_VNC;;
-  --activate-service) ACTIVATE_VNC_SERVICE;;
+  --system-update)      OSMC_UPATE;;
+  --install-vnc)        INSTALL_VNC_SERVER_AND_SERVICE
+                        SET_VARIABLES;;
+  --remove-vnc)         REMOVE_VNC_SERVER_AND_SERVICE;;
+  --update-vnc)         UPDATE_VNC_SERVER;;
+  --change-config)      SET_VARIABLES;;
+  --start-vnc)          START_VNC;;
+  --stop-vnc)           STOP_VNC;;
+  --activate-service)   ACTIVATE_VNC_SERVICE;;
   --deactivate-service) DEACTIVATE_VNC_SERVICE;;
-  --help) HELP;;
-  *) CHECK_ROOT
-     MENU;;
+  --clean-up)           CLEANUP_INSTALL;;
+  --help)               HELP;;
+  *)                    CHECK_ROOT
+                        MENU;;
 esac
