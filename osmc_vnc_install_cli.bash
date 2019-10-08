@@ -379,7 +379,7 @@ function HELP {
   echo "--start-vnc,          start VNC-Server"
   echo "--stop-vnc,           stop VNC-Server"
   echo "--activate-service,   activate VNC as service"
-  echo "--deactivate-service, deactivate the VNC as service"
+  echo "--deactivate-service, deactivate VNC as service"
   echo "--help, this!"
   echo
 }
