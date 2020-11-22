@@ -65,13 +65,13 @@ function OPTIONS {
 }
 
 function APT_UPDATE {
-  apt-get update 1> /dev/null
-  apt-get -y dist-upgrade 1> /dev/null
+  apt update 1> /dev/null
+  apt -y dist-upgrade 1> /dev/null
 }
 
 function APT_CLEAN {
-  apt-get -y autoclean
-  apt-get -y autoremove
+  apt -y autoclean
+  apt -y autoremove
 }
 
 function OSMC_UPATE {
@@ -185,8 +185,8 @@ function SET_VARIABLES {
 }
 
 function APT_INSTALL {
-  apt-get update 1> /dev/null
-  apt-get install -y build-essential rbp-userland-dev-osmc libvncserver-dev libconfig++-dev unzip 1> /dev/null
+  apt update 1> /dev/null
+  apt install -y build-essential rbp-userland-dev-osmc libvncserver-dev libconfig++-dev unzip 1> /dev/null
 }
 
 function CLEANUP_INSTALL {
