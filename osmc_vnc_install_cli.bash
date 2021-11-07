@@ -64,8 +64,8 @@ function OPTIONS {
     7) STOP_VNC;;
     8) ACTIVATE_VNC_SERVICE;;
     9) DEACTIVATE_VNC_SERVICE;;
-	A) CHANGE_KMS_TO_KKMS;;
-	B) CHANGE_FKMS_TO_KMS;;
+    A) CHANGE_KMS_TO_KKMS;;
+    B) CHANGE_FKMS_TO_KMS;;
   esac
 }
 
@@ -75,7 +75,7 @@ function CHANGE_KMS_TO_KKMS {
   if grep -q 'dtoverlay=vc4-kms' '/boot/config.txt';
   then
     sed -i /boot/config.txt -e 's/vc4-kms-v3d/vc4-fkms-v3d/'
-	FORCED_REBOOT
+    FORCED_REBOOT
   fi
 }
 
@@ -85,7 +85,7 @@ function CHANGE_FKMS_TO_KMS {
   if grep -q 'dtoverlay=vc4-fkms' '/boot/config.txt';
   then
     sed -i /boot/config.txt -e 's/vc4-fkms-v3d/vc4-kms-v3d/'
-	FORCED_REBOOT
+    FORCED_REBOOT
   fi
 }
 
@@ -436,9 +436,9 @@ case $1 in
   --system-update)      OSMC_UPATE;;
   --install-vnc)        INSTALL_VNC_SERVER_AND_SERVICE
                         SET_VARIABLES
-						CHANGE_KMS_TO_KKMS;;
+                        CHANGE_KMS_TO_KKMS;;
   --remove-vnc)         REMOVE_VNC_SERVER_AND_SERVICE
-						CHANGE_FKMS_TO_KMS;;
+                        CHANGE_FKMS_TO_KMS;;
   --update-vnc)         UPDATE_VNC_SERVER;;
   --change-config)      SET_VARIABLES;;
   --start-vnc)          START_VNC;;
