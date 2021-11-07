@@ -6,6 +6,7 @@ export LC_ALL="C.UTF-8"
 # Tell ncurses to use line characters that work with UTF-8.
 export NCURSES_NO_UTF8_ACS=1
 
+NARGS=$#
 separator=":"
 
 function CHECK_ROOT {
@@ -49,8 +50,10 @@ function OPTIONS {
   case $VALUE in
     1) OSMC_UPATE;;
     2) INSTALL_VNC_SERVER_AND_SERVICE
-       CHANGE_VNC_SETTINGS --nocancel;;
+       CHANGE_VNC_SETTINGS --nocancel
+	   CHANGE_KMS_TO_KKMS;;
     3) REMOVE_VNC_SERVER_AND_SERVICE
+	   CHANGE_FKMS_TO_KMS
        DONE
        MENU;;
     4) UPDATE_VNC_SERVER
@@ -61,24 +64,55 @@ function OPTIONS {
     7) STOP_VNC;;
     8) ACTIVATE_VNC_SERVICE;;
     9) DEACTIVATE_VNC_SERVICE;;
+	A) CHANGE_KMS_TO_KKMS;;
+	B) CHANGE_FKMS_TO_KMS;;
   esac
 }
 
+function CHANGE_KMS_TO_KKMS {
+  #Name: vc4-fkms-v3d
+  #Info: Enable Eric Anholt's DRM VC4 V3D driver on top of the dispmanx display stack.
+  if grep -q 'dtoverlay=vc4-kms' '/boot/config.txt';
+  then
+    sed -i /boot/config.txt -e 's/vc4-kms-v3d/vc4-fkms-v3d/'
+	FORCED_REBOOT
+  fi
+}
+
+function CHANGE_FKMS_TO_KMS {
+  #Name: vc4-kms-v3d
+  #Info: Enable Eric Anholt's DRM VC4 HDMI/HVS/V3D driver.
+  if grep -q 'dtoverlay=vc4-fkms' '/boot/config.txt';
+  then
+    sed -i /boot/config.txt -e 's/vc4-fkms-v3d/vc4-kms-v3d/'
+	FORCED_REBOOT
+  fi
+}
+
 function APT_UPDATE {
-  apt update 1> /dev/null
-  apt -y dist-upgrade 1> /dev/null
+  apt-get update 1> /dev/null
+}
+
+function APT_UPGRADE {
+  apt-get -y dist-upgrade 1> /dev/null
 }
 
 function APT_CLEAN {
-  apt -y autoclean
-  apt -y autoremove
+  apt-get -y autoclean 1> /dev/null
+  apt-get -y autoremove 1> /dev/null
 }
 
 function OSMC_UPATE {
   echo "starting"
   APT_UPDATE
+  APT_UPGRADE
   APT_CLEAN
-  if [ -n "$1" ];
+  FORCED_REBOOT
+}
+  
+function FORCED_REBOOT {
+  #echo $NARGS
+  if [ $NARGS -ne 1 ];
     then
       REBOOT_FOLLOWS
   fi
@@ -158,7 +192,7 @@ function REMOVE_VNC_SERVER_AND_SERVICE {
   REMOVE_FILES
 }
 
-function GREP_VARIABLES {  
+function GREP_VARIABLES {
   port=$(egrep "port" /etc/dispmanx_vncserver.conf | egrep -o [0-9]+)
   framerate=$(egrep "frame-rate" /etc/dispmanx_vncserver.conf | egrep -o [0-9]+)
   mypassword=$(egrep "password" /etc/dispmanx_vncserver.conf | cut -d'"' -f2)
@@ -185,8 +219,8 @@ function SET_VARIABLES {
 }
 
 function APT_INSTALL {
-  apt update 1> /dev/null
-  apt install -y build-essential rbp-userland-dev-osmc libvncserver-dev libconfig++-dev unzip 1> /dev/null
+  apt-get update 1> /dev/null
+  apt-get install -y build-essential rbp-userland-dev-osmc libvncserver-dev libconfig++-dev unzip 1> /dev/null
 }
 
 function CLEANUP_INSTALL {
@@ -324,22 +358,29 @@ function CONFIG () {
 }
 
 function MENU {
+  menu_options=("1" "OSMC System-Update (with forced reboot)"
+                "2" "Install VNC Server and Service"
+                "3" "Remove VNC Server and Service"
+                "4" "Update VNC Server (mandatory after a kernel update)"
+                "5" "Change VNC Configuration"
+                "6" "Start VNC (manual, not Service)"
+                "7" "Stop VNC (manual, not Service)"
+                "8" "Activate VNC Service"
+                "9" "Deactivate VNC Service")
+  
+  if grep -q 'dtoverlay=vc4' '/boot/config.txt';
+  then
+    menu_options+=("A" "Activate fake-KMS driver"
+                   "B" "Activate KMS driver")
+  fi
+  
   # Store data to $VALUES variable
   VALUE=$(dialog --backtitle "Installing VNC-Server on OSMC" \
          --title "" \
          --stdout \
          --no-tags \
          --cancel-label "Quit" \
-         --menu "Choose a Option" 17 57 9 \
-         "1" "OSMC System-Update (with forced reboot)" \
-         "2" "Install VNC Server and Service" \
-         "3" "Remove VNC Server and Service" \
-         "4" "Update VNC Server (mandatory after a kernel update)" \
-         "5" "Change VNC Configuration" \
-         "6" "Start VNC (manual, not Service)" \
-         "7" "Stop VNC (manual, not Service)" \
-         "8" "Activate VNC Service" \
-         "9" "Deactivate VNC Service"
+         --menu "Choose a Option" 17 57 9 "${menu_options[@]}"
   )
   response=$?
   
@@ -380,21 +421,32 @@ function HELP {
   echo "--stop-vnc,           stop VNC-Server"
   echo "--activate-service,   activate VNC as service"
   echo "--deactivate-service, deactivate VNC as service"
-  echo "--help, this!"
+  
+  if grep -q 'dtoverlay=vc4' '/boot/config.txt';
+  then
+    echo "--change-to-fkms,     change to fake-KMS driver"
+    echo "--change-to-kms,      change to KMS driver"
+  fi
+  
+  echo "--help,               this!"
   echo
 }
 
 case $1 in
   --system-update)      OSMC_UPATE;;
   --install-vnc)        INSTALL_VNC_SERVER_AND_SERVICE
-                        SET_VARIABLES;;
-  --remove-vnc)         REMOVE_VNC_SERVER_AND_SERVICE;;
+                        SET_VARIABLES
+						CHANGE_KMS_TO_KKMS;;
+  --remove-vnc)         REMOVE_VNC_SERVER_AND_SERVICE
+						CHANGE_FKMS_TO_KMS;;
   --update-vnc)         UPDATE_VNC_SERVER;;
   --change-config)      SET_VARIABLES;;
   --start-vnc)          START_VNC;;
   --stop-vnc)           STOP_VNC;;
   --activate-service)   ACTIVATE_VNC_SERVICE;;
   --deactivate-service) DEACTIVATE_VNC_SERVICE;;
+  --change-to-fkms)     CHANGE_KMS_TO_KKMS;;
+  --change-to-kms)      CHANGE_FKMS_TO_KMS;;
   --clean-up)           CLEANUP_INSTALL;;
   --help)               HELP;;
   *)                    CHECK_ROOT
