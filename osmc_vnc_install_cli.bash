@@ -22,7 +22,7 @@ function ROOT_CHECK {
       HELP
       exit 1
     else
-      MENU
+      OPTIONS
   fi
 }
 
@@ -458,8 +458,8 @@ function OPTIONS {
     B|--change-to-kms)      CHANGE_FKMS_TO_KMS;;
     --clean-up)             CLEANUP_INSTALL;;
     --help)                 HELP;;
-    *)                      ROOT_CHECK;;
+    *)                      MENU;;
   esac
 }
 
-OPTIONS
+ROOT_CHECK
