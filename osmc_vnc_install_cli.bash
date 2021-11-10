@@ -7,14 +7,22 @@ export LC_ALL="C.UTF-8"
 export NCURSES_NO_UTF8_ACS=1
 
 NARGS=$#
+VALUE=$1
+
+port=$2
+framerate=$3
+mypassword=$4
+
 separator=":"
 
-function CHECK_ROOT {
+function ROOT_CHECK {
   # check if root for future installations
   if [ "$(id -u)" != "0" ];
     then
       HELP
       exit 1
+	else
+	  OPTIONS
   fi
 }
 
@@ -44,29 +52,6 @@ function CHECK_SERVICE_DISABLED {
     then
       systemctl enable dispmanx_vncserver.service
   fi
-}
-
-function OPTIONS {
-  case $VALUE in
-    1) OSMC_UPATE;;
-    2) INSTALL_VNC_SERVER_AND_SERVICE
-       CHANGE_VNC_SETTINGS --nocancel
-	   CHANGE_KMS_TO_KKMS;;
-    3) REMOVE_VNC_SERVER_AND_SERVICE
-	   CHANGE_FKMS_TO_KMS
-       DONE
-       MENU;;
-    4) UPDATE_VNC_SERVER
-       DONE
-       MENU;;
-    5) CHANGE_VNC_SETTINGS;;
-    6) START_VNC;;
-    7) STOP_VNC;;
-    8) ACTIVATE_VNC_SERVICE;;
-    9) DEACTIVATE_VNC_SERVICE;;
-	A) CHANGE_KMS_TO_KKMS;;
-	B) CHANGE_FKMS_TO_KMS;;
-  esac
 }
 
 function CHANGE_KMS_TO_KKMS {
@@ -109,7 +94,7 @@ function OSMC_UPATE {
   APT_CLEAN
   FORCED_REBOOT
 }
-  
+
 function FORCED_REBOOT {
   #echo $NARGS
   if [ $NARGS -ne 1 ];
@@ -140,6 +125,36 @@ function EXIT {
          5 20
   sleep 0.5
   clear
+}
+
+function INSTALL_VNC {
+  INSTALL_VNC_SERVER_AND_SERVICE
+  if [ $NARGS -ne 1 ];
+    then
+      CHANGE_VNC_SETTINGS --nocancel
+	else
+	  SET_VARIABLES
+  fi
+  CHANGE_KMS_TO_KKMS
+}
+
+function REMOVE_VNC {
+  REMOVE_VNC_SERVER_AND_SERVICE
+  CHANGE_FKMS_TO_KMS
+  if [ $NARGS -ne 1 ];
+    then
+      DONE
+      MENU
+  fi
+}
+
+function UPDATE_VNC {
+  UPDATE_VNC_SERVER
+  if [ $NARGS -ne 1 ];
+    then
+      DONE
+      MENU
+  fi
 }
 
 function INSTALL_VNC_SERVER_AND_SERVICE {
@@ -398,10 +413,6 @@ function MENU {
   esac
 }
 
-port=$2
-framerate=$3
-mypassword=$4
-
 function HELP {
   echo "This script has to run as root: sudo $0"
   echo
@@ -432,23 +443,23 @@ function HELP {
   echo
 }
 
-case $1 in
-  --system-update)      OSMC_UPATE;;
-  --install-vnc)        INSTALL_VNC_SERVER_AND_SERVICE
-                        SET_VARIABLES
-						CHANGE_KMS_TO_KKMS;;
-  --remove-vnc)         REMOVE_VNC_SERVER_AND_SERVICE
-						CHANGE_FKMS_TO_KMS;;
-  --update-vnc)         UPDATE_VNC_SERVER;;
-  --change-config)      SET_VARIABLES;;
-  --start-vnc)          START_VNC;;
-  --stop-vnc)           STOP_VNC;;
-  --activate-service)   ACTIVATE_VNC_SERVICE;;
-  --deactivate-service) DEACTIVATE_VNC_SERVICE;;
-  --change-to-fkms)     CHANGE_KMS_TO_KKMS;;
-  --change-to-kms)      CHANGE_FKMS_TO_KMS;;
-  --clean-up)           CLEANUP_INSTALL;;
-  --help)               HELP;;
-  *)                    CHECK_ROOT
-                        MENU;;
-esac
+function OPTIONS {
+  case $VALUE in
+    1|--system-update)      OSMC_UPATE;;
+    2|--install-vnc)        INSTALL_VNC;;
+    3|--remove-vnc)         REMOVE_VNC;;
+    4|--update-vnc)         UPDATE_VNC;;
+    5|--change-config)      SET_VARIABLES;;
+    6|--start-vnc)          START_VNC;;
+    7|--stop-vnc)           STOP_VNC;;
+    8|--activate-service)   ACTIVATE_VNC_SERVICE;;
+    9|--deactivate-service) DEACTIVATE_VNC_SERVICE;;
+    A|--change-to-fkms)     CHANGE_KMS_TO_KKMS;;
+    B|--change-to-kms)      CHANGE_FKMS_TO_KMS;;
+    --clean-up)             CLEANUP_INSTALL;;
+    --help)                 HELP;;
+    *)                      MENU;;
+  esac
+}
+
+ROOT_CHECK
