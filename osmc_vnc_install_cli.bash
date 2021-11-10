@@ -21,8 +21,8 @@ function ROOT_CHECK {
     then
       HELP
       exit 1
-	else
-	  OPTIONS
+    else
+      MENU
   fi
 }
 
@@ -60,7 +60,7 @@ function CHANGE_KMS_TO_KKMS {
   if grep -q 'dtoverlay=vc4-kms' '/boot/config.txt';
   then
     sed -i /boot/config.txt -e 's/vc4-kms-v3d/vc4-fkms-v3d/'
-    FORCED_REBOOT
+	FORCED_REBOOT
   fi
 }
 
@@ -70,7 +70,7 @@ function CHANGE_FKMS_TO_KMS {
   if grep -q 'dtoverlay=vc4-fkms' '/boot/config.txt';
   then
     sed -i /boot/config.txt -e 's/vc4-fkms-v3d/vc4-kms-v3d/'
-    FORCED_REBOOT
+	FORCED_REBOOT
   fi
 }
 
@@ -458,8 +458,8 @@ function OPTIONS {
     B|--change-to-kms)      CHANGE_FKMS_TO_KMS;;
     --clean-up)             CLEANUP_INSTALL;;
     --help)                 HELP;;
-    *)                      MENU;;
+    *)                      ROOT_CHECK;;
   esac
 }
 
-ROOT_CHECK
+OPTIONS
