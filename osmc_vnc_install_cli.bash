@@ -111,12 +111,18 @@ function CHANGE_AUDIO_TO_CV4 {
 }
 
 function AKTIVE_FKMS {
-  CHANGE_AUDIO_TO_DTPARAM
+  if [ -e "/boot/config-user.txt" ];
+  then
+    CHANGE_AUDIO_TO_DTPARAM
+  fi
   CHANGE_KMS_TO_FKMS
 }
 
 function AKTIVE_KMS {
-  CHANGE_AUDIO_TO_CV4
+  if [ -e "/boot/config-user.txt" ];
+  then
+    CHANGE_AUDIO_TO_CV4
+  fi  
   CHANGE_FKMS_TO_KMS
 }
 
