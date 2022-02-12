@@ -18,43 +18,43 @@ separator=":"
 function ROOT_CHECK {
   # check if root for future installations
   if [ "$(id -u)" != "0" ];
-    then
-      HELP
-      exit 1
-    else
-      OPTIONS
+  then
+    HELP
+    exit 1
+  else
+    OPTIONS
   fi
 }
 
 function CHECK_SERVICE_ACTIVE {
   if [ "`systemctl show dispmanx_vncserver.service -p ActiveState`" = "ActiveState=active" ]
-    then
-      systemctl stop dispmanx_vncserver.service
+  then
+    systemctl stop dispmanx_vncserver.service
   fi
 }
 
 function CHECK_SERVICE_INACTIVE {
   if [ "`systemctl show dispmanx_vncserver.service -p ActiveState`" = "ActiveState=inactive" ]
-    then
-      systemctl start dispmanx_vncserver.service
+  then
+    systemctl start dispmanx_vncserver.service
   fi
 }
 
 function CHECK_SERVICE_ENABLED {
   if [ "`systemctl is-enabled dispmanx_vncserver.service`" = "enabled" ]
-    then
-      systemctl disable dispmanx_vncserver.service
+  then
+    systemctl disable dispmanx_vncserver.service
   fi
 }
 
 function CHECK_SERVICE_DISABLED {
   if [ "`systemctl is-enabled dispmanx_vncserver.service`" = "disabled" ]
-    then
-      systemctl enable dispmanx_vncserver.service
+  then
+    systemctl enable dispmanx_vncserver.service
   fi
 }
 
-function CHANGE_KMS_TO_KKMS {
+function CHANGE_KMS_TO_FKMS {
   #Name: vc4-fkms-v3d
   #Info: Enable Eric Anholt's DRM VC4 V3D driver on top of the dispmanx display stack.
   if grep -q 'dtoverlay=vc4-kms' '/boot/config.txt';
@@ -72,6 +72,52 @@ function CHANGE_FKMS_TO_KMS {
     sed -i /boot/config.txt -e 's/vc4-fkms-v3d/vc4-kms-v3d/'
 	FORCED_REBOOT
   fi
+}
+
+function CHANGE_AUDIO_TO_DTPARAM {
+  #Change audio directing to dtparam since fKMS does not support audio trough HMDI by default
+  if [ -e "/boot/config-user.txt" ];
+  then
+    if grep -q '[all]' '/boot/config-user.txt';
+    then
+	  :
+	else
+      echo [all] >> /boot/config-user.txt
+    fi
+    
+    if grep -q '#dtparam=audio=on' '/boot/config-user.txt';
+    then
+      sed -i /boot/config-user.txt -e 's/#dtparam=audio=on/dtparam=audio=on/'
+    else
+	  if grep -q 'dtparam=audio=on' '/boot/config-user.txt';
+      then
+	    :
+	  else
+        sed -i '/[all]/a dtparam=audio=on' /boot/config-user.txt
+	  fi
+    fi
+  fi
+}
+
+function CHANGE_AUDIO_TO_CV4 {
+  #Change audio directing to KMS support by vc4
+  if [ -e "/boot/config-user.txt" ];
+  then
+    if grep -q 'dtparam=audio=on' '/boot/config-user.txt';
+    then
+      sed -i /boot/config-user.txt -e 's/dtparam=audio=on/#dtparam=audio=on/'
+    fi
+  fi
+}
+
+function AKTIVE_FKMS {
+  CHANGE_AUDIO_TO_DTPARAM
+  CHANGE_KMS_TO_FKMS
+}
+
+function AKTIVE_KMS {
+  CHANGE_AUDIO_TO_CV4
+  CHANGE_FKMS_TO_KMS
 }
 
 function APT_UPDATE {
@@ -98,8 +144,8 @@ function OSMC_UPATE {
 function FORCED_REBOOT {
   #echo $NARGS
   if [ $NARGS -ne 1 ];
-    then
-      REBOOT_FOLLOWS
+  then
+    REBOOT_FOLLOWS
   fi
   sleep 0.5
   clear
@@ -130,31 +176,32 @@ function EXIT {
 function INSTALL_VNC {
   INSTALL_VNC_SERVER_AND_SERVICE
   if [ $NARGS -ne 1 ];
-    then
-      CHANGE_VNC_SETTINGS --nocancel
-	else
-	  SET_VARIABLES
+  then
+    CHANGE_VNC_SETTINGS --nocancel
+  else
+	SET_VARIABLES
   fi
-  CHANGE_KMS_TO_KKMS
+  AKTIVE_FKMS
 }
 
 function REMOVE_VNC {
   REMOVE_VNC_SERVER_AND_SERVICE
-  CHANGE_FKMS_TO_KMS
+  AKTIVE_KMS
   if [ $NARGS -ne 1 ];
-    then
-      DONE
-      MENU
+  then
+    DONE
+    MENU
   fi
 }
 
 function UPDATE_VNC {
   UPDATE_VNC_SERVER
   if [ $NARGS -ne 1 ];
-    then
-      DONE
-      MENU
+  then
+    DONE
+    MENU
   fi
+  CHANGE_KMS_TO_FKMS
 }
 
 function INSTALL_VNC_SERVER_AND_SERVICE {
@@ -242,13 +289,13 @@ function CLEANUP_INSTALL {
   cd /home/osmc/
   
   if [ -d "dispmanx_vnc-master/" ];
-    then
-      rm -rf dispmanx_vnc-master/
+  then
+    rm -rf dispmanx_vnc-master/
   fi
   
   if [ -e "master.zip" ];
-    then
-      rm -f master.zip
+  then
+    rm -f master.zip
   fi
 }
 
@@ -262,8 +309,8 @@ function REMOVE_CONF {
   cd /etc
   
   if [ -e "dispmanx_vncserver.conf" ];
-    then
-      rm -f dispmanx_vncserver.conf
+  then
+    rm -f dispmanx_vncserver.conf
   fi
 }
 
@@ -271,8 +318,8 @@ function REMOVE_BIN {
   cd /usr/bin
   
   if [ -e "dispmanx_vncserver" ];
-    then
-      rm -f dispmanx_vncserver
+  then
+    rm -f dispmanx_vncserver
   fi
 }
 
@@ -280,8 +327,8 @@ function REMOVE_SERVICE_FILE {
   cd /etc/systemd/system
   
   if [ -e "dispmanx_vncserver.service" ];
-    then
-      rm -f dispmanx_vncserver.service
+  then
+    rm -f dispmanx_vncserver.service
   fi
 }
 
@@ -386,7 +433,7 @@ function MENU {
   if grep -q 'dtoverlay=vc4' '/boot/config.txt';
   then
     menu_options+=("A" "Activate fake-KMS driver"
-                   "B" "Activate KMS driver")
+                   "B" "Activate KMS driver (mandatory update)")
   fi
   
   # Store data to $VALUES variable
@@ -436,7 +483,7 @@ function HELP {
   if grep -q 'dtoverlay=vc4' '/boot/config.txt';
   then
     echo "--change-to-fkms,     change to fake-KMS driver"
-    echo "--change-to-kms,      change to KMS driver"
+    echo "--change-to-kms,      change to KMS driver (mandatory update)"
   fi
   
   echo "--help,               this!"
@@ -454,7 +501,7 @@ function OPTIONS {
     7|--stop-vnc)           STOP_VNC;;
     8|--activate-service)   ACTIVATE_VNC_SERVICE;;
     9|--deactivate-service) DEACTIVATE_VNC_SERVICE;;
-    A|--change-to-fkms)     CHANGE_KMS_TO_KKMS;;
+    A|--change-to-fkms)     CHANGE_KMS_TO_FKMS;;
     B|--change-to-kms)      CHANGE_FKMS_TO_KMS;;
     --clean-up)             CLEANUP_INSTALL;;
     --help)                 HELP;;
