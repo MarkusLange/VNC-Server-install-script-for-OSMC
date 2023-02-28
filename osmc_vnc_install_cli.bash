@@ -60,7 +60,7 @@ function CHANGE_KMS_TO_FKMS {
   if grep -q 'dtoverlay=vc4-kms' '/boot/config.txt';
   then
     sed -i /boot/config.txt -e 's/vc4-kms-v3d/vc4-fkms-v3d/'
-	FORCED_REBOOT
+    FORCED_REBOOT
   fi
 }
 
@@ -70,7 +70,7 @@ function CHANGE_FKMS_TO_KMS {
   if grep -q 'dtoverlay=vc4-fkms' '/boot/config.txt';
   then
     sed -i /boot/config.txt -e 's/vc4-fkms-v3d/vc4-kms-v3d/'
-	FORCED_REBOOT
+    FORCED_REBOOT
   fi
 }
 
@@ -80,8 +80,8 @@ function CHANGE_AUDIO_TO_DTPARAM {
   then
     if grep -q '[all]' '/boot/config-user.txt';
     then
-	  :
-	else
+      :
+    else
       echo [all] >> /boot/config-user.txt
     fi
     
@@ -89,12 +89,12 @@ function CHANGE_AUDIO_TO_DTPARAM {
     then
       sed -i /boot/config-user.txt -e 's/#dtparam=audio=on/dtparam=audio=on/'
     else
-	  if grep -q 'dtparam=audio=on' '/boot/config-user.txt';
+      if grep -q 'dtparam=audio=on' '/boot/config-user.txt';
       then
-	    :
-	  else
+        :
+      else
         sed -i '/[all]/a dtparam=audio=on' /boot/config-user.txt
-	  fi
+      fi
     fi
   fi
 }
@@ -399,7 +399,7 @@ function CONFIG () {
         "Framerate: (10-25)" 2 2 "$framerate"   2 21 12 0 0 \
         "VNC-Password:"      3 2 "$mypassword"  3 21 12 0 1 \
   )
-  rep=$?
+  response=$?
   
   # display values just entered
   #echo "$VALUES"
@@ -413,15 +413,11 @@ function CONFIG () {
   #echo "$framerate"
   #echo "$mypassword"
   
-  case $rep in
-   0)   SET_VARIABLES
-        DONE
-        MENU
-        ;;
-   1)   MENU
-        ;;
-   255) MENU
-        ;;
+  case $response in
+   0)      SET_VARIABLES
+           DONE
+           MENU;;
+   1|255)  MENU;;
   esac
 }
 
@@ -457,12 +453,8 @@ function MENU {
   #echo "$VALUE"
   
   case $response in
-   0)   OPTIONS
-        ;;
-   1)   EXIT
-        ;;
-   255) EXIT
-        ;;
+   0)      OPTIONS;;
+   1|255)  EXIT;;
   esac
 }
 
